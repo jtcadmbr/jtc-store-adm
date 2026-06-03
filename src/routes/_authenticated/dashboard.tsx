@@ -11,13 +11,17 @@ function DashboardPage() {
   const { data } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const { count: apps } = await supabase.from("apps").select("*", { count: "exact", head: true });
-      const { data: recent } = await supabase
+      const { data: all } = await supabase
         .from("apps")
         .select("id,name,version,icon_url,category,created_at")
-        .order("created_at", { ascending: false })
-        .limit(6);
-      return { apps: apps ?? 0, recent: recent ?? [] };
+        .order("created_at", { ascending: false });
+      const rows = all ?? [];
+      const byCat = (c: string) => rows.filter((r) => r.category === c).length;
+      return {
+        apps: rows.length,
+        recent: rows.slice(0, 6),
+        counts: { Apps: byCat("Apps"), Jogos: byCat("Jogos"), Livros: byCat("Livros") },
+      };
     },
   });
 
@@ -30,7 +34,7 @@ function DashboardPage() {
             Bom trabalho hoje.
           </h1>
           <p className="mt-2 text-muted-foreground max-w-lg">
-            Acompanhe sua operação e publique APKs direto no armazenamento interno da JTC Store.
+            Tudo que você publicar aqui aparece automaticamente na JTC Store.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -43,10 +47,11 @@ function DashboardPage() {
       </header>
 
       {/* Stat grid */}
-      <section className="grid gap-px bg-border border border-border rounded-xl overflow-hidden md:grid-cols-3">
-        <StatCell label="Aplicativos publicados" value={String(data?.apps ?? 0).padStart(2, "0")} hint="no catálogo" icon={Package} />
-        <StatCell label="Storage interno" value="ativo" hint="upload automático" icon={HardDrive} small />
-        <StatCell label="Última publicação" value={data?.recent[0]?.name ?? "—"} hint={data?.recent[0] ? new Date(data.recent[0].created_at).toLocaleDateString("pt-BR") : "aguardando"} icon={Clock} small />
+      <section className="grid gap-px bg-border border border-border rounded-xl overflow-hidden md:grid-cols-4">
+        <StatCell label="Total publicado" value={String(data?.apps ?? 0).padStart(2, "0")} hint="no catálogo" icon={Package} />
+        <StatCell label="Apps" value={String(data?.counts.Apps ?? 0).padStart(2, "0")} hint="categoria" icon={Package} />
+        <StatCell label="Jogos" value={String(data?.counts.Jogos ?? 0).padStart(2, "0")} hint="categoria" icon={Package} />
+        <StatCell label="Livros" value={String(data?.counts.Livros ?? 0).padStart(2, "0")} hint="categoria" icon={Package} />
       </section>
 
       {/* Quick actions */}
