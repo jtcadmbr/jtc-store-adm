@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Plus, Trash2, Download, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,17 @@ function AppsListPage() {
   const [filter, setFilter] = useState<"Todos" | "Apps" | "Jogos" | "Livros">("Todos");
   const filtered = (data ?? []).filter((a) => filter === "Todos" || a.category === filter);
   const FILTERS = ["Todos", "Apps", "Jogos", "Livros"] as const;
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("apps-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "apps" }, () => {
+        qc.invalidateQueries({ queryKey: ["apps"] });
+        qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]);
 
   async function remove(app: App) {
     if (!confirm(`Excluir "${app.name}"?`)) return;
