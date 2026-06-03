@@ -16,6 +16,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated/apps'
 import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticated/apps.new'
 import { Route as ApiPublicAppsIndexRouteImport } from './routes/api/public/apps.index'
+import { Route as AuthenticatedAppsIdEditRouteImport } from './routes/_authenticated/apps.$id.edit'
 import { Route as ApiPublicAppsIdIconRouteImport } from './routes/api/public/apps.$id.icon'
 import { Route as ApiPublicAppsIdDownloadRouteImport } from './routes/api/public/apps.$id.download'
 import { Route as ApiPublicAppsIdScreenshotIndexRouteImport } from './routes/api/public/apps.$id.screenshot.$index'
@@ -54,6 +55,11 @@ const ApiPublicAppsIndexRoute = ApiPublicAppsIndexRouteImport.update({
   path: '/api/public/apps/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppsIdEditRoute = AuthenticatedAppsIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AuthenticatedAppsRoute,
+} as any)
 const ApiPublicAppsIdIconRoute = ApiPublicAppsIdIconRouteImport.update({
   id: '/api/public/apps/$id/icon',
   path: '/api/public/apps/$id/icon',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/apps': typeof AuthenticatedAppsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/apps': typeof AuthenticatedAppsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authenticated/apps': typeof AuthenticatedAppsRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/apps/new': typeof AuthenticatedAppsNewRoute
+  '/_authenticated/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/dashboard'
     | '/apps/new'
+    | '/apps/$id/edit'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/apps'
     | '/dashboard'
     | '/apps/new'
+    | '/apps/$id/edit'
     | '/api/public/apps'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/apps'
     | '/_authenticated/dashboard'
     | '/_authenticated/apps/new'
+    | '/_authenticated/apps/$id/edit'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
@@ -204,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAppsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/apps/$id/edit': {
+      id: '/_authenticated/apps/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/apps/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAppsIdEditRouteImport
+      parentRoute: typeof AuthenticatedAppsRoute
+    }
     '/api/public/apps/$id/icon': {
       id: '/api/public/apps/$id/icon'
       path: '/api/public/apps/$id/icon'
@@ -230,10 +249,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppsRouteChildren {
   AuthenticatedAppsNewRoute: typeof AuthenticatedAppsNewRoute
+  AuthenticatedAppsIdEditRoute: typeof AuthenticatedAppsIdEditRoute
 }
 
 const AuthenticatedAppsRouteChildren: AuthenticatedAppsRouteChildren = {
   AuthenticatedAppsNewRoute: AuthenticatedAppsNewRoute,
+  AuthenticatedAppsIdEditRoute: AuthenticatedAppsIdEditRoute,
 }
 
 const AuthenticatedAppsRouteWithChildren =
@@ -264,3 +285,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
