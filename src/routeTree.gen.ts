@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated/apps'
+import { Route as AuthenticatedBooksNewRouteImport } from './routes/_authenticated/books.new'
 import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticated/apps.new'
 import { Route as ApiPublicAppsIndexRouteImport } from './routes/api/public/apps.index'
 import { Route as AuthenticatedAppsIdEditRouteImport } from './routes/_authenticated/apps.$id.edit'
@@ -50,6 +51,11 @@ const AuthenticatedAppsRoute = AuthenticatedAppsRouteImport.update({
   id: '/apps',
   path: '/apps',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBooksNewRoute = AuthenticatedBooksNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedBooksRoute,
 } as any)
 const AuthenticatedAppsNewRoute = AuthenticatedAppsNewRouteImport.update({
   id: '/new',
@@ -87,9 +93,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
-  '/books': typeof AuthenticatedBooksRoute
+  '/books': typeof AuthenticatedBooksRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/books/new': typeof AuthenticatedBooksNewRoute
   '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -100,9 +107,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
-  '/books': typeof AuthenticatedBooksRoute
+  '/books': typeof AuthenticatedBooksRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/books/new': typeof AuthenticatedBooksNewRoute
   '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -115,9 +123,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/apps': typeof AuthenticatedAppsRouteWithChildren
-  '/_authenticated/books': typeof AuthenticatedBooksRoute
+  '/_authenticated/books': typeof AuthenticatedBooksRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/apps/new': typeof AuthenticatedAppsNewRoute
+  '/_authenticated/books/new': typeof AuthenticatedBooksNewRoute
   '/_authenticated/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/books'
     | '/dashboard'
     | '/apps/new'
+    | '/books/new'
     | '/apps/$id/edit'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/books'
     | '/dashboard'
     | '/apps/new'
+    | '/books/new'
     | '/apps/$id/edit'
     | '/api/public/apps'
     | '/api/public/apps/$id/download'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_authenticated/books'
     | '/_authenticated/dashboard'
     | '/_authenticated/apps/new'
+    | '/_authenticated/books/new'
     | '/_authenticated/apps/$id/edit'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/books/new': {
+      id: '/_authenticated/books/new'
+      path: '/new'
+      fullPath: '/books/new'
+      preLoaderRoute: typeof AuthenticatedBooksNewRouteImport
+      parentRoute: typeof AuthenticatedBooksRoute
+    }
     '/_authenticated/apps/new': {
       id: '/_authenticated/apps/new'
       path: '/new'
@@ -279,15 +298,26 @@ const AuthenticatedAppsRouteChildren: AuthenticatedAppsRouteChildren = {
 const AuthenticatedAppsRouteWithChildren =
   AuthenticatedAppsRoute._addFileChildren(AuthenticatedAppsRouteChildren)
 
+interface AuthenticatedBooksRouteChildren {
+  AuthenticatedBooksNewRoute: typeof AuthenticatedBooksNewRoute
+}
+
+const AuthenticatedBooksRouteChildren: AuthenticatedBooksRouteChildren = {
+  AuthenticatedBooksNewRoute: AuthenticatedBooksNewRoute,
+}
+
+const AuthenticatedBooksRouteWithChildren =
+  AuthenticatedBooksRoute._addFileChildren(AuthenticatedBooksRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppsRoute: typeof AuthenticatedAppsRouteWithChildren
-  AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
+  AuthenticatedBooksRoute: typeof AuthenticatedBooksRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppsRoute: AuthenticatedAppsRouteWithChildren,
-  AuthenticatedBooksRoute: AuthenticatedBooksRoute,
+  AuthenticatedBooksRoute: AuthenticatedBooksRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
