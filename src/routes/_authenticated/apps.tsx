@@ -73,7 +73,7 @@ function AppsListPage() {
             <article key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-elevated hover:border-primary/50 transition group">
               <div className="flex items-start gap-3">
                 {app.icon_url ? (
-                  <img src={app.icon_url} alt="" className="w-14 h-14 rounded-xl object-cover border border-border" />
+                  <img src={`/api/public/apps/${app.id}/icon`} alt="" className="w-14 h-14 rounded-xl object-cover border border-border" />
                 ) : (
                   <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center">
                     <Package className="w-6 h-6 text-primary-foreground" />
@@ -87,7 +87,7 @@ function AppsListPage() {
               </div>
               <p className="text-sm text-muted-foreground mt-3 line-clamp-2 min-h-[2.5rem]">{app.description || "Sem descrição."}</p>
               <div className="flex gap-2 mt-4">
-                <a href={app.apk_url} target="_blank" rel="noreferrer" className="flex-1">
+                <a href={`/api/public/apps/${app.id}/download`} target="_blank" rel="noreferrer" className="flex-1">
                   <Button variant="secondary" size="sm" className="w-full"><Download className="w-3.5 h-3.5 mr-1" /> APK</Button>
                 </a>
                 <Button size="icon" variant="ghost" onClick={() => setEditing(app)}><Pencil className="w-4 h-4" /></Button>
