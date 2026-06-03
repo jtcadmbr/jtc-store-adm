@@ -43,6 +43,17 @@ function AppsListPage() {
   const filtered = (data ?? []).filter((a) => filter === "Todos" || a.category === filter);
   const FILTERS = ["Todos", "Apps", "Jogos", "Livros"] as const;
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("apps-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "apps" }, () => {
+        qc.invalidateQueries({ queryKey: ["apps"] });
+        qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [qc]);
+
   async function remove(app: App) {
     if (!confirm(`Excluir "${app.name}"?`)) return;
     const { error } = await supabase.from("apps").delete().eq("id", app.id);
