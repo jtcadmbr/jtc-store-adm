@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/apps/")({
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            "Cache-Control": "public, max-age=60",
+            "Cache-Control": "no-store",
             ...CORS,
           },
         });
