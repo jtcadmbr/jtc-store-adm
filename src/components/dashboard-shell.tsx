@@ -105,7 +105,7 @@ function NavList({ pathname, onNavigate }: { pathname: string; onNavigate: () =>
     <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
       <p className="px-3 pt-2 pb-3 font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Navegação</p>
       {nav.map((item) => {
-        const active = pathname === item.to || (item.to === "/apps" && pathname.startsWith("/apps") && pathname !== "/apps/new");
+        const active = pathname === item.to || (item.to !== "/dashboard" && pathname.startsWith(item.to + "/"));
         const Icon = item.icon;
         return (
           <Link
