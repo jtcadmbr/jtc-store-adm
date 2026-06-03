@@ -56,8 +56,6 @@ function NewAppPage() {
       const { error } = await supabase.from("apps").insert({
         name, description, category, version,
         icon_url: iconUrl, apk_url: apkUrl,
-        server_id: null,
-        server_name: "JTC Store",
       });
       if (error) throw error;
 
@@ -129,7 +127,6 @@ function NewAppPage() {
             onChange={setApkFile}
             icon={<FileArchive className="w-5 h-5" />}
             hint="Arquivo .apk"
-            required
           />
         </div>
 
@@ -144,9 +141,9 @@ function NewAppPage() {
   );
 }
 
-function FileField({ label, accept, file, onChange, icon, hint, required }: {
+function FileField({ label, accept, file, onChange, icon, hint }: {
   label: string; accept: string; file: File | null; onChange: (f: File | null) => void;
-  icon: React.ReactNode; hint: string; required?: boolean;
+  icon: React.ReactNode; hint: string;
 }) {
   return (
     <div className="space-y-2">
