@@ -83,7 +83,7 @@ function DashboardPage() {
                 <li key={app.id} className="flex items-center gap-4 px-4 md:px-6 py-4 hover:bg-muted/40 transition">
                   <span className="hidden sm:block font-mono text-xs text-muted-foreground w-6">{String(i + 1).padStart(2, "0")}</span>
                   {app.icon_url ? (
-                    <img src={app.icon_url} alt="" className="w-10 h-10 rounded-md object-cover border border-border" />
+                    <img src={`/api/public/apps/${app.id}/icon`} alt="" className="w-10 h-10 rounded-md object-cover border border-border" />
                   ) : (
                     <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
                       <Package className="w-4 h-4 text-muted-foreground" />

@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedServersRouteImport } from './routes/_authenticated/servers'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated/apps'
 import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticated/apps.new'
@@ -33,11 +32,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedServersRoute = AuthenticatedServersRouteImport.update({
-  id: '/servers',
-  path: '/servers',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -75,7 +69,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/servers': typeof AuthenticatedServersRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -86,7 +79,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/servers': typeof AuthenticatedServersRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
   '/api/public/apps': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -99,7 +91,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/apps': typeof AuthenticatedAppsRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/servers': typeof AuthenticatedServersRoute
   '/_authenticated/apps/new': typeof AuthenticatedAppsNewRoute
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
@@ -112,7 +103,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/apps'
     | '/dashboard'
-    | '/servers'
     | '/apps/new'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
@@ -123,7 +113,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/apps'
     | '/dashboard'
-    | '/servers'
     | '/apps/new'
     | '/api/public/apps'
     | '/api/public/apps/$id/download'
@@ -135,7 +124,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/apps'
     | '/_authenticated/dashboard'
-    | '/_authenticated/servers'
     | '/_authenticated/apps/new'
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
@@ -173,13 +161,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/servers': {
-      id: '/_authenticated/servers'
-      path: '/servers'
-      fullPath: '/servers'
-      preLoaderRoute: typeof AuthenticatedServersRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -240,13 +221,11 @@ const AuthenticatedAppsRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppsRoute: typeof AuthenticatedAppsRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedServersRoute: typeof AuthenticatedServersRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppsRoute: AuthenticatedAppsRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedServersRoute: AuthenticatedServersRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
