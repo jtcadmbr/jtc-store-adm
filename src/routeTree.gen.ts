@@ -16,6 +16,7 @@ import { Route as AuthenticatedServersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated/apps'
 import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticated/apps.new'
+import { Route as ApiPublicAppsIndexRouteImport } from './routes/api/public/apps.index'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -51,6 +52,11 @@ const AuthenticatedAppsNewRoute = AuthenticatedAppsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedAppsRoute,
 } as any)
+const ApiPublicAppsIndexRoute = ApiPublicAppsIndexRouteImport.update({
+  id: '/api/public/apps/',
+  path: '/api/public/apps/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/servers': typeof AuthenticatedServersRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/api/public/apps/': typeof ApiPublicAppsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/servers': typeof AuthenticatedServersRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
+  '/api/public/apps': typeof ApiPublicAppsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,12 +85,27 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/servers': typeof AuthenticatedServersRoute
   '/_authenticated/apps/new': typeof AuthenticatedAppsNewRoute
+  '/api/public/apps/': typeof ApiPublicAppsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/apps' | '/dashboard' | '/servers' | '/apps/new'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/apps'
+    | '/dashboard'
+    | '/servers'
+    | '/apps/new'
+    | '/api/public/apps/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/apps' | '/dashboard' | '/servers' | '/apps/new'
+  to:
+    | '/'
+    | '/auth'
+    | '/apps'
+    | '/dashboard'
+    | '/servers'
+    | '/apps/new'
+    | '/api/public/apps'
   id:
     | '__root__'
     | '/'
@@ -92,12 +115,14 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/servers'
     | '/_authenticated/apps/new'
+    | '/api/public/apps/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicAppsIndexRoute: typeof ApiPublicAppsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsNewRouteImport
       parentRoute: typeof AuthenticatedAppsRoute
     }
+    '/api/public/apps/': {
+      id: '/api/public/apps/'
+      path: '/api/public/apps'
+      fullPath: '/api/public/apps/'
+      preLoaderRoute: typeof ApiPublicAppsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -184,7 +216,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicAppsIndexRoute: ApiPublicAppsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
