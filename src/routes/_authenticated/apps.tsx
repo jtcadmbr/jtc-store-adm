@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Package, Plus, Trash2, Download, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/apps")({
-  component: AppsListPage,
+  component: AppsRouteShell,
 });
 
 type App = {
@@ -21,6 +21,11 @@ type App = {
   version: string; icon_url: string | null; apk_url: string;
   created_at: string;
 };
+
+function AppsRouteShell() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  return pathname.startsWith("/apps/") ? <Outlet /> : <AppsListPage />;
+}
 
 function AppsListPage() {
   const qc = useQueryClient();
