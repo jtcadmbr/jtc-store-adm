@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, Package, Server, Zap } from "lucide-react";
+import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, Package, HardDrive, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -62,14 +62,13 @@ function AuthPage() {
             <span className="text-gradient">Distribua.</span>
           </h2>
           <p className="mt-6 max-w-md text-muted-foreground leading-relaxed">
-            O painel da JTC Store unifica publicação de APKs, gerenciamento de servidores e
-            biblioteca de aplicativos em um só lugar — feito sob medida para sua operação.
+            O painel da JTC Store publica APKs, organiza o catálogo e conecta tudo ao storage interno automaticamente.
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-px bg-border/60 border border-border rounded-md overflow-hidden">
             {[
               { i: Package, l: "Catálogo" },
-              { i: Server, l: "Servidores" },
+              { i: HardDrive, l: "Storage" },
               { i: ShieldCheck, l: "Seguro" },
             ].map(({ i: Icon, l }) => (
               <div key={l} className="bg-sidebar px-4 py-5 flex flex-col items-start gap-2">
