@@ -45,8 +45,9 @@ function NewAppPage() {
     const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
     if (error) throw error;
-    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-    return data?.signedUrl ?? "";
+    // Salva apenas o path no banco. Os endpoints públicos (/api/public/apps/:id/download
+    // e /icon) geram uma signed URL fresca em cada chamada, então o link nunca expira.
+    return path;
   }
 
   async function uploadToExternalServer(serverUrl: string, apiKey: string, file: File): Promise<string> {
