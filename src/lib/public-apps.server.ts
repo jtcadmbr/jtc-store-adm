@@ -13,7 +13,7 @@ export async function resolveStoredUrl(
   stored: string | null | undefined,
 ): Promise<string | null> {
   if (!stored) return null;
-  if (isHttpUrl(stored)) return stored; // external storage server — pass through
+  if (isHttpUrl(stored)) return stored; // mantém compatibilidade com registros antigos
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)
     .createSignedUrl(stored, SIGNED_URL_TTL_SECONDS);
