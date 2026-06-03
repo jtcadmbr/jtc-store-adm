@@ -64,20 +64,36 @@ function AppsListPage() {
         </Link>
       </header>
 
+      <div className="flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 h-9 rounded-full text-sm font-medium border transition ${
+              filter === f
+                ? "bg-primary text-primary-foreground border-primary shadow-glow"
+                : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+            }`}
+          >
+            {f} {f !== "Todos" && <span className="opacity-60 ml-1">{(data ?? []).filter((a) => a.category === f).length}</span>}
+          </button>
+        ))}
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center p-12"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
-      ) : !data?.length ? (
+      ) : !filtered.length ? (
         <div className="rounded-xl border border-dashed border-border p-12 text-center">
           <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <p className="font-medium">Nenhum aplicativo ainda</p>
-          <p className="text-sm text-muted-foreground mt-1">Comece publicando seu primeiro APK.</p>
+          <p className="font-medium">{data?.length ? `Nenhum item em "${filter}"` : "Nenhum aplicativo ainda"}</p>
+          <p className="text-sm text-muted-foreground mt-1">{data?.length ? "Selecione outra categoria ou publique um novo APK." : "Comece publicando seu primeiro APK."}</p>
           <Link to="/apps/new" className="inline-block mt-4">
             <Button className="bg-gradient-primary text-primary-foreground">Postar APK</Button>
           </Link>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((app) => (
+          {filtered.map((app) => (
             <article key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-elevated hover:border-primary/50 transition group">
               <div className="flex items-start gap-3">
                 {app.icon_url ? (
