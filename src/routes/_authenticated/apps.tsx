@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/apps")({
 type App = {
   id: string; name: string; description: string; category: string;
   version: string; icon_url: string | null; apk_url: string;
-  server_name: string | null; created_at: string;
+  created_at: string;
 };
 
 function AppsListPage() {
@@ -82,7 +82,7 @@ function AppsListPage() {
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold truncate">{app.name}</h3>
                   <p className="text-xs text-muted-foreground">v{app.version} · {app.category}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{app.server_name ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">Storage interno JTC Store</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-3 line-clamp-2 min-h-[2.5rem]">{app.description || "Sem descrição."}</p>

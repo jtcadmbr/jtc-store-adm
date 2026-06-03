@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Upload, Loader2, Image as ImageIcon, FileArchive } from "lucide-react";
 import { toast } from "sonner";
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/select";
 
 const CATEGORIES = ["Jogos", "Comunicação", "Produtividade", "Entretenimento", "Educação", "Ferramentas", "Redes Sociais", "Outros"];
-const INTERNAL_ID = "__internal__";
 
 export const Route = createFileRoute("/_authenticated/apps/new")({
   component: NewAppPage,
@@ -22,20 +20,10 @@ export const Route = createFileRoute("/_authenticated/apps/new")({
 
 function NewAppPage() {
   const navigate = useNavigate();
-  const { data: servers } = useQuery({
-    queryKey: ["storage_servers"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("storage_servers").select("*").order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
-
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [version, setVersion] = useState("");
-  const [serverId, setServerId] = useState(INTERNAL_ID);
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [apkFile, setApkFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -50,21 +38,6 @@ function NewAppPage() {
     return path;
   }
 
-  async function uploadToExternalServer(serverUrl: string, apiKey: string, file: File): Promise<string> {
-    const form = new FormData();
-    form.append("file", file);
-    const res = await fetch(serverUrl, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
-      body: form,
-    });
-    if (!res.ok) throw new Error(`Servidor externo retornou ${res.status}`);
-    const json = await res.json().catch(() => ({}));
-    const url = json.url || json.downloadUrl || json.fileUrl || json.data?.url;
-    if (!url) throw new Error("Servidor externo não retornou uma URL de download");
-    return url;
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!apkFile) { toast.error("Selecione o arquivo APK"); return; }
@@ -76,24 +49,13 @@ function NewAppPage() {
         iconUrl = await uploadToInternalBucket("app-icons", iconFile);
       }
 
-      setProgress("Enviando APK para o servidor de destino…");
-      let apkUrl = "";
-      let serverName = "Armazenamento interno (JTC)";
-      if (serverId === INTERNAL_ID) {
-        apkUrl = await uploadToInternalBucket("app-apks", apkFile);
-      } else {
-        const srv = servers?.find((s) => s.id === serverId);
-        if (!srv) throw new Error("Servidor não encontrado");
-        apkUrl = await uploadToExternalServer(srv.endpoint_url, srv.api_key, apkFile);
-        serverName = srv.name;
-      }
+      setProgress("Enviando APK para o armazenamento interno…");
+      const apkUrl = await uploadToInternalBucket("app-apks", apkFile);
 
       setProgress("Salvando registro…");
       const { error } = await supabase.from("apps").insert({
         name, description, category, version,
         icon_url: iconUrl, apk_url: apkUrl,
-        server_id: serverId === INTERNAL_ID ? null : serverId,
-        server_name: serverName,
       });
       if (error) throw error;
 
@@ -142,15 +104,10 @@ function NewAppPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Servidor de destino</Label>
-            <Select value={serverId} onValueChange={setServerId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={INTERNAL_ID}>Armazenamento interno (JTC)</SelectItem>
-                {servers?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 px-4 py-3">
+            <Label>Armazenamento</Label>
+            <p className="text-sm font-medium">Conectado automaticamente à JTC Store</p>
+            <p className="text-xs text-muted-foreground">Logo e APK serão salvos no storage interno.</p>
           </div>
         </div>
 
@@ -170,7 +127,6 @@ function NewAppPage() {
             onChange={setApkFile}
             icon={<FileArchive className="w-5 h-5" />}
             hint="Arquivo .apk"
-            required
           />
         </div>
 
@@ -185,9 +141,9 @@ function NewAppPage() {
   );
 }
 
-function FileField({ label, accept, file, onChange, icon, hint, required }: {
+function FileField({ label, accept, file, onChange, icon, hint }: {
   label: string; accept: string; file: File | null; onChange: (f: File | null) => void;
-  icon: React.ReactNode; hint: string; required?: boolean;
+  icon: React.ReactNode; hint: string;
 }) {
   return (
     <div className="space-y-2">
