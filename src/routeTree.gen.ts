@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
 import { Route as AuthenticatedAppsRouteImport } from './routes/_authenticated/apps'
 import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticated/apps.new'
 import { Route as ApiPublicAppsIndexRouteImport } from './routes/api/public/apps.index'
@@ -38,6 +39,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBooksRoute = AuthenticatedBooksRouteImport.update({
+  id: '/books',
+  path: '/books',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppsRoute = AuthenticatedAppsRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
+  '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
   '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/apps': typeof AuthenticatedAppsRouteWithChildren
+  '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/apps/new': typeof AuthenticatedAppsNewRoute
   '/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/apps': typeof AuthenticatedAppsRouteWithChildren
+  '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/apps/new': typeof AuthenticatedAppsNewRoute
   '/_authenticated/apps/$id/edit': typeof AuthenticatedAppsIdEditRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/apps'
+    | '/books'
     | '/dashboard'
     | '/apps/new'
     | '/apps/$id/edit'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/apps'
+    | '/books'
     | '/dashboard'
     | '/apps/new'
     | '/apps/$id/edit'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/apps'
+    | '/_authenticated/books'
     | '/_authenticated/dashboard'
     | '/_authenticated/apps/new'
     | '/_authenticated/apps/$id/edit'
@@ -193,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/books': {
+      id: '/_authenticated/books'
+      path: '/books'
+      fullPath: '/books'
+      preLoaderRoute: typeof AuthenticatedBooksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps': {
@@ -262,11 +281,13 @@ const AuthenticatedAppsRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppsRoute: typeof AuthenticatedAppsRouteWithChildren
+  AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppsRoute: AuthenticatedAppsRouteWithChildren,
+  AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
