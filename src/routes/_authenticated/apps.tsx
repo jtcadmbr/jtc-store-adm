@@ -1,16 +1,10 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Package, Plus, Trash2, Download, Loader2, Pencil } from "lucide-react";
+import { Package, Plus, Trash2, Download, Loader2, Pencil, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/apps")({
   component: AppsRouteShell,
@@ -19,64 +13,65 @@ export const Route = createFileRoute("/_authenticated/apps")({
 type App = {
   id: string; name: string; description: string; category: string;
   version: string; icon_url: string | null; apk_url: string;
-  created_at: string;
+  screenshots: string[]; created_at: string;
 };
 
 function AppsRouteShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  return pathname.startsWith("/apps/") ? <Outlet /> : <AppsListPage />;
+  return pathname === "/apps" ? <AppsListPage /> : <Outlet />;
 }
 
 function AppsListPage() {
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
-    queryKey: ["apps"],
+    queryKey: ["items", "apps"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("apps").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("apps")
+        .select("*")
+        .in("category", ["Apps", "Jogos"])
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as App[];
     },
   });
 
-  const [editing, setEditing] = useState<App | null>(null);
-  const [filter, setFilter] = useState<"Todos" | "Apps" | "Jogos" | "Livros">("Todos");
+  const [filter, setFilter] = useState<"Todos" | "Apps" | "Jogos">("Todos");
   const filtered = (data ?? []).filter((a) => filter === "Todos" || a.category === filter);
-  const FILTERS = ["Todos", "Apps", "Jogos", "Livros"] as const;
 
   useEffect(() => {
-    const channel = supabase
-      .channel("apps-realtime")
+    const ch = supabase
+      .channel("apps-list-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "apps" }, () => {
-        qc.invalidateQueries({ queryKey: ["apps"] });
+        qc.invalidateQueries({ queryKey: ["items", "apps"] });
         qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(ch); };
   }, [qc]);
 
   async function remove(app: App) {
     if (!confirm(`Excluir "${app.name}"?`)) return;
     const { error } = await supabase.from("apps").delete().eq("id", app.id);
     if (error) { toast.error("Erro ao excluir"); return; }
-    toast.success("Aplicativo removido");
-    qc.invalidateQueries({ queryKey: ["apps"] });
+    toast.success("Removido");
   }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Biblioteca</p>
-          <h1 className="text-3xl md:text-4xl font-bold mt-1">Aplicativos</h1>
-          <p className="text-muted-foreground mt-1">Todos os apps publicados na JTC Store.</p>
+          <p className="font-mono text-[11px] uppercase tracking-widest text-primary">02 / Aplicativos</p>
+          <h1 className="text-3xl md:text-4xl font-display font-semibold mt-2">Apps & Jogos</h1>
+          <p className="text-muted-foreground mt-1">Tudo aparece em tempo real na JTC Store.</p>
         </div>
         <Link to="/apps/new">
-          <Button className="bg-gradient-primary text-primary-foreground shadow-glow"><Plus className="w-4 h-4 mr-2" /> Novo aplicativo</Button>
+          <Button className="bg-gradient-primary text-primary-foreground shadow-glow"><Plus className="w-4 h-4 mr-2" /> Publicar novo</Button>
         </Link>
       </header>
 
       <div className="flex flex-wrap gap-2">
-        {FILTERS.map((f) => (
+        {(["Todos", "Apps", "Jogos"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -86,7 +81,7 @@ function AppsListPage() {
                 : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
             }`}
           >
-            {f} {f !== "Todos" && <span className="opacity-60 ml-1">{(data ?? []).filter((a) => a.category === f).length}</span>}
+            {f}{f !== "Todos" && <span className="opacity-60 ml-1.5">{(data ?? []).filter((a) => a.category === f).length}</span>}
           </button>
         ))}
       </div>
@@ -96,28 +91,27 @@ function AppsListPage() {
       ) : !filtered.length ? (
         <div className="rounded-xl border border-dashed border-border p-12 text-center">
           <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <p className="font-medium">{data?.length ? `Nenhum item em "${filter}"` : "Nenhum aplicativo ainda"}</p>
-          <p className="text-sm text-muted-foreground mt-1">{data?.length ? "Selecione outra categoria ou publique um novo APK." : "Comece publicando seu primeiro APK."}</p>
+          <p className="font-medium">{data?.length ? `Nada em "${filter}"` : "Nenhum aplicativo ainda"}</p>
           <Link to="/apps/new" className="inline-block mt-4">
-            <Button className="bg-gradient-primary text-primary-foreground">Postar APK</Button>
+            <Button className="bg-gradient-primary text-primary-foreground">Publicar primeiro</Button>
           </Link>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((app) => (
-            <article key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-elevated hover:border-primary/50 transition group">
+            <article key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-elevated hover:border-primary/50 transition">
               <div className="flex items-start gap-3">
                 {app.icon_url ? (
                   <img src={`/api/public/apps/${app.id}/icon`} alt="" className="w-14 h-14 rounded-xl object-cover border border-border" />
                 ) : (
                   <div className="w-14 h-14 rounded-xl bg-gradient-primary flex items-center justify-center">
-                    <Package className="w-6 h-6 text-primary-foreground" />
+                    {app.category === "Jogos" ? <Gamepad2 className="w-6 h-6 text-primary-foreground" /> : <Package className="w-6 h-6 text-primary-foreground" />}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold truncate">{app.name}</h3>
                   <p className="text-xs text-muted-foreground">v{app.version} · {app.category}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">Storage interno JTC Store</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{app.screenshots?.length ?? 0} print(s)</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-3 line-clamp-2 min-h-[2.5rem]">{app.description || "Sem descrição."}</p>
@@ -125,7 +119,9 @@ function AppsListPage() {
                 <a href={`/api/public/apps/${app.id}/download`} target="_blank" rel="noreferrer" className="flex-1">
                   <Button variant="secondary" size="sm" className="w-full"><Download className="w-3.5 h-3.5 mr-1" /> APK</Button>
                 </a>
-                <Button size="icon" variant="ghost" onClick={() => setEditing(app)}><Pencil className="w-4 h-4" /></Button>
+                <Link to="/apps/$id/edit" params={{ id: app.id }}>
+                  <Button size="icon" variant="ghost"><Pencil className="w-4 h-4" /></Button>
+                </Link>
                 <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => remove(app)}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -134,52 +130,6 @@ function AppsListPage() {
           ))}
         </div>
       )}
-
-      <EditDialog app={editing} onClose={() => setEditing(null)} />
     </div>
-  );
-}
-
-function EditDialog({ app, onClose }: { app: App | null; onClose: () => void }) {
-  const qc = useQueryClient();
-  const [saving, setSaving] = useState(false);
-
-  if (!app) return null;
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    if (!app) return;
-    const fd = new FormData(e.target as HTMLFormElement);
-    setSaving(true);
-    const { error } = await supabase.from("apps").update({
-      name: String(fd.get("name")),
-      description: String(fd.get("description")),
-      category: String(fd.get("category")),
-      version: String(fd.get("version")),
-    }).eq("id", app.id);
-    setSaving(false);
-    if (error) { toast.error("Erro ao salvar"); return; }
-    toast.success("Aplicativo atualizado");
-    qc.invalidateQueries({ queryKey: ["apps"] });
-    onClose();
-  }
-
-  return (
-    <Dialog open={!!app} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
-        <DialogHeader><DialogTitle>Editar aplicativo</DialogTitle></DialogHeader>
-        <form onSubmit={save} className="space-y-4">
-          <div className="space-y-2"><Label>Nome</Label><Input name="name" defaultValue={app.name} required /></div>
-          <div className="space-y-2"><Label>Versão</Label><Input name="version" defaultValue={app.version} required /></div>
-          <div className="space-y-2"><Label>Categoria</Label><Input name="category" defaultValue={app.category} required /></div>
-          <div className="space-y-2"><Label>Descrição</Label><Textarea name="description" defaultValue={app.description} rows={4} /></div>
-          <DialogFooter>
-            <Button type="submit" disabled={saving} className="bg-gradient-primary text-primary-foreground">
-              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null} Salvar
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/public/apps/")({
         const origin = new URL(request.url).origin;
         const { data, error } = await supabaseAdmin
           .from("apps")
-          .select("id, name, description, category, version, created_at, updated_at")
+          .select("id, name, description, category, version, screenshots, created_at, updated_at")
           .order("created_at", { ascending: false });
 
         if (error) {
@@ -26,10 +26,14 @@ export const Route = createFileRoute("/api/public/apps/")({
           });
         }
 
-        const apps = (data ?? []).map((row) => ({
-          ...row,
-          ...buildStableUrls(origin, row.id),
-        }));
+        const apps = (data ?? []).map((row) => {
+          const shots = (row.screenshots ?? []) as string[];
+          return {
+            ...row,
+            ...buildStableUrls(origin, row.id),
+            screenshot_urls: shots.map((_, i) => `${origin}/api/public/apps/${row.id}/screenshot/${i}`),
+          };
+        });
 
         return new Response(JSON.stringify({ apps }), {
           status: 200,

@@ -9,7 +9,7 @@ function isHttpUrl(value: string | null | undefined): value is string {
 }
 
 export async function resolveStoredUrl(
-  bucket: "app-icons" | "app-apks",
+  bucket: "app-icons" | "app-apks" | "app-screenshots",
   stored: string | null | undefined,
 ): Promise<string | null> {
   if (!stored) return null;

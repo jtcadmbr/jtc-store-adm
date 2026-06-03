@@ -23,6 +23,7 @@ export type Database = {
           icon_url: string | null
           id: string
           name: string
+          screenshots: string[]
           server_id: string | null
           server_name: string | null
           updated_at: string
@@ -36,6 +37,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name: string
+          screenshots?: string[]
           server_id?: string | null
           server_name?: string | null
           updated_at?: string
@@ -49,6 +51,7 @@ export type Database = {
           icon_url?: string | null
           id?: string
           name?: string
+          screenshots?: string[]
           server_id?: string | null
           server_name?: string | null
           updated_at?: string
