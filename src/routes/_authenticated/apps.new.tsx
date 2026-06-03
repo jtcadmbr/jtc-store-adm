@@ -198,7 +198,7 @@ function FileField({ label, accept, file, onChange, icon, hint, required }: {
           <p className="text-sm font-medium truncate">{file ? file.name : `Selecionar ${label.toLowerCase()}`}</p>
           <p className="text-xs text-muted-foreground">{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : hint}</p>
         </div>
-        <input type="file" accept={accept} required={required && !file} className="hidden" onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
+        <input type="file" accept={accept} className="hidden" onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
       </label>
     </div>
   );
