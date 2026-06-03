@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Package, Server, Upload, ArrowUpRight, Clock } from "lucide-react";
+import { Package, Upload, ArrowUpRight, Clock, HardDrive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -11,16 +11,13 @@ function DashboardPage() {
   const { data } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [{ count: apps }, { count: servers }] = await Promise.all([
-        supabase.from("apps").select("*", { count: "exact", head: true }),
-        supabase.from("storage_servers").select("*", { count: "exact", head: true }),
-      ]);
+      const { count: apps } = await supabase.from("apps").select("*", { count: "exact", head: true });
       const { data: recent } = await supabase
         .from("apps")
         .select("id,name,version,icon_url,server_name,category,created_at")
         .order("created_at", { ascending: false })
         .limit(6);
-      return { apps: apps ?? 0, servers: servers ?? 0, recent: recent ?? [] };
+      return { apps: apps ?? 0, recent: recent ?? [] };
     },
   });
 
@@ -33,7 +30,7 @@ function DashboardPage() {
             Bom trabalho hoje.
           </h1>
           <p className="mt-2 text-muted-foreground max-w-lg">
-            Acompanhe sua operação, publique novos APKs e gerencie os servidores de distribuição da JTC Store.
+            Acompanhe sua operação e publique APKs direto no armazenamento interno da JTC Store.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -48,7 +45,7 @@ function DashboardPage() {
       {/* Stat grid */}
       <section className="grid gap-px bg-border border border-border rounded-xl overflow-hidden md:grid-cols-3">
         <StatCell label="Aplicativos publicados" value={String(data?.apps ?? 0).padStart(2, "0")} hint="no catálogo" icon={Package} />
-        <StatCell label="Servidores conectados" value={String(data?.servers ?? 0).padStart(2, "0")} hint="endpoints ativos" icon={Server} />
+        <StatCell label="Storage interno" value="ativo" hint="upload automático" icon={HardDrive} small />
         <StatCell label="Última publicação" value={data?.recent[0]?.name ?? "—"} hint={data?.recent[0] ? new Date(data.recent[0].created_at).toLocaleDateString("pt-BR") : "aguardando"} icon={Clock} small />
       </section>
 
@@ -61,7 +58,7 @@ function DashboardPage() {
         <div className="grid md:grid-cols-3 gap-3">
           <QuickCard to="/apps/new" code="A" title="Publicar novo APK" desc="Envie um aplicativo para a loja." icon={Upload} />
           <QuickCard to="/apps" code="B" title="Gerenciar biblioteca" desc="Edite versões e descrições." icon={Package} />
-          <QuickCard to="/servers" code="C" title="Conectar servidor" desc="Adicione um destino externo." icon={Server} />
+          <QuickCard to="/apps/new" code="C" title="Upload interno" desc="Logo e APK já ficam conectados." icon={HardDrive} />
         </div>
       </section>
 
