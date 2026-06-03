@@ -106,15 +106,10 @@ function NewAppPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Servidor de destino</Label>
-            <Select value={serverId} onValueChange={setServerId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={INTERNAL_ID}>Armazenamento interno (JTC)</SelectItem>
-                {servers?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 px-4 py-3">
+            <Label>Armazenamento</Label>
+            <p className="text-sm font-medium">Conectado automaticamente à JTC Store</p>
+            <p className="text-xs text-muted-foreground">Logo e APK serão salvos no storage interno.</p>
           </div>
         </div>
 
