@@ -18,6 +18,7 @@ import { Route as AuthenticatedAppsNewRouteImport } from './routes/_authenticate
 import { Route as ApiPublicAppsIndexRouteImport } from './routes/api/public/apps.index'
 import { Route as ApiPublicAppsIdIconRouteImport } from './routes/api/public/apps.$id.icon'
 import { Route as ApiPublicAppsIdDownloadRouteImport } from './routes/api/public/apps.$id.download'
+import { Route as ApiPublicAppsIdScreenshotIndexRouteImport } from './routes/api/public/apps.$id.screenshot.$index'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -63,6 +64,12 @@ const ApiPublicAppsIdDownloadRoute = ApiPublicAppsIdDownloadRouteImport.update({
   path: '/api/public/apps/$id/download',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicAppsIdScreenshotIndexRoute =
+  ApiPublicAppsIdScreenshotIndexRouteImport.update({
+    id: '/api/public/apps/$id/screenshot/$index',
+    path: '/api/public/apps/$id/screenshot/$index',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
+  '/api/public/apps/$id/screenshot/$index': typeof ApiPublicAppsIdScreenshotIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/api/public/apps': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
+  '/api/public/apps/$id/screenshot/$index': typeof ApiPublicAppsIdScreenshotIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/api/public/apps/': typeof ApiPublicAppsIndexRoute
   '/api/public/apps/$id/download': typeof ApiPublicAppsIdDownloadRoute
   '/api/public/apps/$id/icon': typeof ApiPublicAppsIdIconRoute
+  '/api/public/apps/$id/screenshot/$index': typeof ApiPublicAppsIdScreenshotIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
+    | '/api/public/apps/$id/screenshot/$index'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/api/public/apps'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
+    | '/api/public/apps/$id/screenshot/$index'
   id:
     | '__root__'
     | '/'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/api/public/apps/'
     | '/api/public/apps/$id/download'
     | '/api/public/apps/$id/icon'
+    | '/api/public/apps/$id/screenshot/$index'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -137,6 +150,7 @@ export interface RootRouteChildren {
   ApiPublicAppsIndexRoute: typeof ApiPublicAppsIndexRoute
   ApiPublicAppsIdDownloadRoute: typeof ApiPublicAppsIdDownloadRoute
   ApiPublicAppsIdIconRoute: typeof ApiPublicAppsIdIconRoute
+  ApiPublicAppsIdScreenshotIndexRoute: typeof ApiPublicAppsIdScreenshotIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -204,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAppsIdDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/apps/$id/screenshot/$index': {
+      id: '/api/public/apps/$id/screenshot/$index'
+      path: '/api/public/apps/$id/screenshot/$index'
+      fullPath: '/api/public/apps/$id/screenshot/$index'
+      preLoaderRoute: typeof ApiPublicAppsIdScreenshotIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -238,7 +259,18 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicAppsIndexRoute: ApiPublicAppsIndexRoute,
   ApiPublicAppsIdDownloadRoute: ApiPublicAppsIdDownloadRoute,
   ApiPublicAppsIdIconRoute: ApiPublicAppsIdIconRoute,
+  ApiPublicAppsIdScreenshotIndexRoute: ApiPublicAppsIdScreenshotIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
