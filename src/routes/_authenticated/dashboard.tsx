@@ -14,7 +14,7 @@ function DashboardPage() {
       const { count: apps } = await supabase.from("apps").select("*", { count: "exact", head: true });
       const { data: recent } = await supabase
         .from("apps")
-        .select("id,name,version,icon_url,server_name,category,created_at")
+        .select("id,name,version,icon_url,category,created_at")
         .order("created_at", { ascending: false })
         .limit(6);
       return { apps: apps ?? 0, recent: recent ?? [] };
@@ -92,7 +92,7 @@ function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{app.name}</p>
                     <p className="font-mono text-[11px] text-muted-foreground truncate">
-                      v{app.version} · {app.category} · {app.server_name ?? "interno"}
+                      v{app.version} · {app.category} · storage interno
                     </p>
                   </div>
                   <span className="font-mono text-[11px] text-muted-foreground whitespace-nowrap">
