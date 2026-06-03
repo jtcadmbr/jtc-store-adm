@@ -39,6 +39,9 @@ function AppsListPage() {
   });
 
   const [editing, setEditing] = useState<App | null>(null);
+  const [filter, setFilter] = useState<"Todos" | "Apps" | "Jogos" | "Livros">("Todos");
+  const filtered = (data ?? []).filter((a) => filter === "Todos" || a.category === filter);
+  const FILTERS = ["Todos", "Apps", "Jogos", "Livros"] as const;
 
   async function remove(app: App) {
     if (!confirm(`Excluir "${app.name}"?`)) return;
