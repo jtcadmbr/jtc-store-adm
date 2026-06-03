@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Server, Upload, Package, LogOut, Menu, X, Zap, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Upload, Package, LogOut, Menu, X, Zap, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,14 +9,12 @@ const nav = [
   { to: "/dashboard", label: "Visão geral", icon: LayoutDashboard, code: "01" },
   { to: "/apps", label: "Aplicativos", icon: Package, code: "02" },
   { to: "/apps/new", label: "Publicar APK", icon: Upload, code: "03" },
-  { to: "/servers", label: "Servidores", icon: Server, code: "04" },
 ] as const;
 
 const titles: Record<string, string> = {
   "/dashboard": "Visão geral",
   "/apps": "Biblioteca",
   "/apps/new": "Publicar APK",
-  "/servers": "Servidores",
 };
 
 export function DashboardShell({ children }: { children: ReactNode }) {
