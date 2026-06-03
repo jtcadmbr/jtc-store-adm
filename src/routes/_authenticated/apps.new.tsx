@@ -12,7 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
-const CATEGORIES = ["Jogos", "Comunicação", "Produtividade", "Entretenimento", "Educação", "Ferramentas", "Redes Sociais", "Outros"];
+const CATEGORIES = ["Apps", "Jogos", "Livros"];
 
 export const Route = createFileRoute("/_authenticated/apps/new")({
   component: NewAppPage,
