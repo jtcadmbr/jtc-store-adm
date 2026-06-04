@@ -127,8 +127,8 @@
   }
   .noise {
     background-image:
-      radial-gradient(1200px 600px at 90% -10%, oklch(0.74 0.18 48 / 10%), transparent 60%),
-      radial-gradient(700px 400px at -10% 110%, oklch(0.70 0.10 180 / 8%), transparent 60%);
+      radial-gradient(1200px 600px at 90% -10%, oklch(0.62 0.22 278 / 12%), transparent 60%),
+      radial-gradient(700px 400px at -10% 110%, oklch(0.55 0.22 278 / 10%), transparent 60%);
     background-attachment: fixed;
   }
   .grid-bg {
