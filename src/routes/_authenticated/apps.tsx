@@ -72,7 +72,7 @@ function AppsListPage() {
       </header>
 
       <div className="flex flex-wrap gap-2">
-        {(["Todos", "Apps", "Jogos"] as const).map((f) => (
+        {(["Todos", ...categories] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
