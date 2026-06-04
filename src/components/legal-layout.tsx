@@ -40,7 +40,7 @@ export function LegalLayout({ title, subtitle, children }: LegalLayoutProps) {
           </h1>
         </div>
 
-        <article className="prose prose-invert prose-sm max-w-none">
+        <article className="space-y-8 max-w-none text-sm leading-relaxed text-foreground/90">
           {children}
         </article>
 
