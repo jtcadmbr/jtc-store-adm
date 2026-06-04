@@ -75,6 +75,8 @@ export function ItemForm({
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [existingShots, setExistingShots] = useState<string[]>(initial?.screenshots ?? []);
   const [newShots, setNewShots] = useState<File[]>([]);
+  const [rating, setRating] = useState<number>(initial?.rating ?? 4.5);
+  const [isFeatured, setIsFeatured] = useState<boolean>(initial?.is_featured ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState("");
 
