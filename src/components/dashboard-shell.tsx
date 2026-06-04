@@ -83,6 +83,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </header>
         <main className="flex-1 p-4 md:p-10">{children}</main>
       </div>
+      <UploadProgressDock />
     </div>
   );
 }
