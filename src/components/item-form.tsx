@@ -24,6 +24,8 @@ export type ItemRecord = {
   icon_url: string | null;
   apk_url: string;
   screenshots: string[];
+  rating: number;
+  is_featured: boolean;
 };
 
 const CATEGORIES_BY_KIND: Record<Kind, string[]> = {
