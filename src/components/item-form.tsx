@@ -164,6 +164,28 @@ export function ItemForm({
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Avaliação (estrelas)</Label>
+          <Input
+            type="number"
+            min={1}
+            max={5}
+            step={0.1}
+            value={rating}
+            onChange={(e) => setRating(Math.min(5, Math.max(1, Number(e.target.value) || 0)))}
+          />
+          <p className="text-xs text-muted-foreground">De 1.0 a 5.0</p>
+        </div>
+        <div className="space-y-2 rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
+          <div>
+            <Label>Em destaque</Label>
+            <p className="text-xs text-muted-foreground">Aparece em destaque na JTC Store</p>
+          </div>
+          <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
         <FileField
           label={editing ? "Substituir ícone" : "Ícone"}
           accept="image/*"
