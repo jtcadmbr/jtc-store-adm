@@ -29,14 +29,15 @@ function AppsListPage() {
       const { data, error } = await supabase
         .from("apps")
         .select("*")
-        .in("category", ["Apps", "Jogos"])
+        .neq("category", "Livros")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as App[];
     },
   });
 
-  const [filter, setFilter] = useState<"Todos" | "Apps" | "Jogos">("Todos");
+  const categories = Array.from(new Set((data ?? []).map((a) => a.category))).sort();
+  const [filter, setFilter] = useState<string>("Todos");
   const filtered = (data ?? []).filter((a) => filter === "Todos" || a.category === filter);
 
   useEffect(() => {
@@ -71,7 +72,7 @@ function AppsListPage() {
       </header>
 
       <div className="flex flex-wrap gap-2">
-        {(["Todos", "Apps", "Jogos"] as const).map((f) => (
+        {(["Todos", ...categories] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
