@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/public/apps/")({
         const origin = new URL(request.url).origin;
         const { data, error } = await supabaseAdmin
           .from("apps")
-          .select("id, name, description, category, version, screenshots, created_at, updated_at")
+          .select("id, name, description, category, version, rating, is_featured, screenshots, created_at, updated_at")
           .order("created_at", { ascending: false });
 
         if (error) {
