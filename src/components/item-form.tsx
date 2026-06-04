@@ -110,6 +110,7 @@ export function ItemForm({
       const payload = {
         name, description, category, version,
         icon_url: iconUrl, apk_url: mainUrl, screenshots,
+        rating, is_featured: isFeatured,
       };
 
       const { error } = editing
