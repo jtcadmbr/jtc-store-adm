@@ -4,6 +4,7 @@ import { LayoutDashboard, Upload, Package, BookOpen, LogOut, Menu, X, Zap, Chevr
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { UploadProgressDock } from "@/components/upload-progress-dock";
 
 const nav = [
   { to: "/dashboard", label: "Visão geral", icon: LayoutDashboard, code: "01" },
@@ -82,6 +83,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </header>
         <main className="flex-1 p-4 md:p-10">{children}</main>
       </div>
+      <UploadProgressDock />
     </div>
   );
 }
