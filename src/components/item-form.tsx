@@ -3,7 +3,6 @@ import { Upload, Loader2, Image as ImageIcon, FileArchive, X, Plus } from "lucid
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { enqueueItemUpload } from "@/lib/upload-queue";
 
 export type Kind = "app" | "book";
 
@@ -46,13 +46,6 @@ const FILE_FIELD_BY_KIND: Record<Kind, { label: string; accept: string; hint: st
   },
 };
 
-async function uploadTo(bucket: string, file: File) {
-  const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: false });
-  if (error) throw error;
-  return path;
-}
-
 export function ItemForm({
   kind,
   initial,
@@ -78,54 +71,29 @@ export function ItemForm({
   const [rating, setRating] = useState<number>(initial?.rating ?? 4.5);
   const [isFeatured, setIsFeatured] = useState<boolean>(initial?.is_featured ?? false);
   const [submitting, setSubmitting] = useState(false);
-  const [progress, setProgress] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!name.trim()) { toast.error("Informe um nome"); return; }
     if (!editing && !mainFile) { toast.error(`Selecione o ${fileMeta.label.toLowerCase()}`); return; }
     setSubmitting(true);
-    try {
-      let iconUrl: string | null = initial?.icon_url ?? null;
-      if (iconFile) {
-        setProgress("Enviando ícone…");
-        iconUrl = await uploadTo("app-icons", iconFile);
-      }
 
-      let mainUrl = initial?.apk_url ?? "";
-      if (mainFile) {
-        setProgress(`Enviando ${fileMeta.label.toLowerCase()}…`);
-        mainUrl = await uploadTo("app-apks", mainFile);
-      }
+    enqueueItemUpload({
+      kind,
+      editing,
+      recordId: initial?.id,
+      name, description, category, version,
+      rating, is_featured: isFeatured,
+      existingIconUrl: initial?.icon_url ?? null,
+      existingApkUrl: initial?.apk_url ?? "",
+      existingScreenshots: existingShots,
+      iconFile, mainFile, newShots,
+    });
 
-      let screenshots = [...existingShots];
-      if (newShots.length) {
-        setProgress("Enviando prints…");
-        for (const f of newShots) {
-          const path = await uploadTo("app-screenshots", f);
-          screenshots.push(path);
-        }
-      }
-
-      setProgress("Salvando…");
-      const payload = {
-        name, description, category, version,
-        icon_url: iconUrl, apk_url: mainUrl, screenshots,
-        rating, is_featured: isFeatured,
-      };
-
-      const { error } = editing
-        ? await supabase.from("apps").update(payload).eq("id", initial!.id)
-        : await supabase.from("apps").insert(payload);
-      if (error) throw error;
-
-      toast.success(editing ? "Atualizado com sucesso!" : "Publicado com sucesso!");
-      navigate({ to: onDoneRedirect });
-    } catch (err: any) {
-      toast.error("Erro ao salvar", { description: err.message });
-    } finally {
-      setSubmitting(false);
-      setProgress("");
-    }
+    toast.success(editing ? "Atualização iniciada" : "Publicação iniciada", {
+      description: "Acompanhe o progresso no canto inferior direito.",
+    });
+    navigate({ to: onDoneRedirect });
   }
 
   return (
@@ -236,10 +204,9 @@ export function ItemForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-2">
-        <p className="text-xs text-muted-foreground min-h-[1rem]">{progress}</p>
+      <div className="flex items-center justify-end gap-3 pt-2">
         <Button type="submit" disabled={submitting} className="bg-gradient-primary text-primary-foreground shadow-glow">
-          {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Salvando…</> : <><Upload className="w-4 h-4 mr-2" /> {editing ? "Salvar alterações" : "Publicar"}</>}
+          {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Iniciando…</> : <><Upload className="w-4 h-4 mr-2" /> {editing ? "Salvar alterações" : "Publicar"}</>}
         </Button>
       </div>
     </form>
@@ -267,8 +234,8 @@ function FileField({ label, accept, file, onChange, icon, hint }: {
 
 function ShotThumb({ src, label, onRemove }: { src: string; label?: string; onRemove: () => void }) {
   return (
-    <div className="relative group aspect-[9/16] rounded-lg overflow-hidden border border-border bg-muted">
-      <img src={src} alt="" className="w-full h-full object-cover" />
+    <div className="relative group aspect-[9/16] rounded-lg overflow-hidden border border-border bg-muted/40 flex items-center justify-center">
+      <img src={src} alt="" className="max-w-full max-h-full object-contain" />
       {label && <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-mono uppercase">{label}</span>}
       <button
         type="button"
