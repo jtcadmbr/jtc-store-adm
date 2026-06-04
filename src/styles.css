@@ -109,7 +109,7 @@
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
-  ::selection { background: oklch(0.74 0.18 48 / 35%); color: var(--foreground); }
+  ::selection { background: oklch(0.62 0.22 278 / 40%); color: var(--foreground); }
 }
 
 @layer utilities {
