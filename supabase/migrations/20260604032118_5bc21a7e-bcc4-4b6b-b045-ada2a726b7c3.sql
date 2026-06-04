@@ -1,0 +1,3 @@
+ALTER TABLE public.apps
+  ADD COLUMN IF NOT EXISTS rating numeric(2,1) NOT NULL DEFAULT 4.5,
+  ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAULT false;

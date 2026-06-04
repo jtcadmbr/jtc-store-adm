@@ -22,7 +22,9 @@ export type Database = {
           description: string
           icon_url: string | null
           id: string
+          is_featured: boolean
           name: string
+          rating: number
           screenshots: string[]
           server_id: string | null
           server_name: string | null
@@ -36,7 +38,9 @@ export type Database = {
           description?: string
           icon_url?: string | null
           id?: string
+          is_featured?: boolean
           name: string
+          rating?: number
           screenshots?: string[]
           server_id?: string | null
           server_name?: string | null
@@ -50,7 +54,9 @@ export type Database = {
           description?: string
           icon_url?: string | null
           id?: string
+          is_featured?: boolean
           name?: string
+          rating?: number
           screenshots?: string[]
           server_id?: string | null
           server_name?: string | null

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export type Kind = "app" | "book";
 
@@ -23,6 +24,8 @@ export type ItemRecord = {
   icon_url: string | null;
   apk_url: string;
   screenshots: string[];
+  rating: number;
+  is_featured: boolean;
 };
 
 const CATEGORIES_BY_KIND: Record<Kind, string[]> = {
@@ -72,6 +75,8 @@ export function ItemForm({
   const [mainFile, setMainFile] = useState<File | null>(null);
   const [existingShots, setExistingShots] = useState<string[]>(initial?.screenshots ?? []);
   const [newShots, setNewShots] = useState<File[]>([]);
+  const [rating, setRating] = useState<number>(initial?.rating ?? 4.5);
+  const [isFeatured, setIsFeatured] = useState<boolean>(initial?.is_featured ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState("");
 
@@ -105,6 +110,7 @@ export function ItemForm({
       const payload = {
         name, description, category, version,
         icon_url: iconUrl, apk_url: mainUrl, screenshots,
+        rating, is_featured: isFeatured,
       };
 
       const { error } = editing
@@ -154,6 +160,28 @@ export function ItemForm({
           <Label>Storage</Label>
           <p className="text-sm font-medium">Conectado à JTC Store</p>
           <p className="text-xs text-muted-foreground">Tudo é salvo no armazenamento interno.</p>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Avaliação (estrelas)</Label>
+          <Input
+            type="number"
+            min={1}
+            max={5}
+            step={0.1}
+            value={rating}
+            onChange={(e) => setRating(Math.min(5, Math.max(1, Number(e.target.value) || 0)))}
+          />
+          <p className="text-xs text-muted-foreground">De 1.0 a 5.0</p>
+        </div>
+        <div className="space-y-2 rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
+          <div>
+            <Label>Em destaque</Label>
+            <p className="text-xs text-muted-foreground">Aparece em destaque na JTC Store</p>
+          </div>
+          <Switch checked={isFeatured} onCheckedChange={setIsFeatured} />
         </div>
       </div>
 
