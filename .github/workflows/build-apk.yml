@@ -1,0 +1,154 @@
+name: Build APK
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: 'Build ID'
+        required: true
+      app_name:
+        description: 'App name'
+        required: true
+      package_id:
+        description: 'Package ID (com.example.app)'
+        required: true
+      zip_url:
+        description: 'Signed URL of the website ZIP'
+        required: true
+
+run-name: "JTC WebZipk · ${{ inputs.app_name }} · ${{ inputs.build_id }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Download website ZIP
+        run: |
+          mkdir -p site
+          curl -L "${{ inputs.zip_url }}" -o site.zip
+          unzip -q site.zip -d site
+          for i in 1 2 3; do
+            if [ $(ls site | wc -l) = "1" ] && [ -d "site/$(ls site)" ]; then
+              inner="site/$(ls site)"
+              shopt -s dotglob && mv "$inner"/* site/ && rmdir "$inner" && shopt -u dotglob
+            fi
+          done
+          ls -la site
+
+      - name: Detect & prepare web build
+        id: detect
+        shell: bash
+        run: |
+          set -e
+          cd site
+          INDEX=$(find . -maxdepth 6 -type f -iname 'index.html' \
+            -not -path '*/node_modules/*' -not -path '*/.git/*' \
+            -not -path '*/src/*' -not -path '*/public/*' \
+            -print -quit || true)
+          if [ -n "$INDEX" ]; then
+            WEBROOT=$(dirname "$INDEX")
+            echo "Found prebuilt index.html at: $INDEX"
+            echo "webroot=site/$WEBROOT" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          PKG=$(find . -maxdepth 4 -type f -name 'package.json' \
+            -not -path '*/node_modules/*' -print -quit || true)
+          if [ -z "$PKG" ]; then
+            echo "ERROR: ZIP has no index.html and no package.json."
+            exit 1
+          fi
+          PROJDIR=$(dirname "$PKG")
+          echo "Building project at: $PROJDIR"
+          cd "$PROJDIR"
+          if [ -f package-lock.json ]; then npm ci || npm install;
+          elif [ -f yarn.lock ]; then npm i -g yarn && yarn install;
+          elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm install;
+          else npm install; fi
+          if node -e "process.exit(require('./package.json').scripts?.build?0:1)"; then
+            npm run build
+          else
+            echo "ERROR: no build script in package.json"; exit 1
+          fi
+          for d in dist build out www public/dist .output/public; do
+            if [ -d "$d" ] && [ -f "$d/index.html" ]; then
+              echo "webroot=site/$PROJDIR/$d" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+          BUILT=$(find . -maxdepth 5 -type f -iname 'index.html' \
+            -not -path '*/node_modules/*' -not -path '*/src/*' -print -quit || true)
+          if [ -n "$BUILT" ]; then
+            echo "webroot=site/$PROJDIR/$(dirname $BUILT)" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "ERROR: build finished but no index.html was produced."
+          exit 1
+
+      - name: Create Capacitor project
+        run: |
+          mkdir app && cd app
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "${{ inputs.app_name }}" "${{ inputs.package_id }}" --web-dir=www
+          mkdir www
+          cp -r ../${{ steps.detect.outputs.webroot }}/. www/
+          npx cap add android
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/android/app/release.keystore
+
+      - name: Configure signing
+        run: |
+          cat >> app/android/app/build.gradle <<EOF
+
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file('release.keystore')
+                      storePassword System.getenv('KEYSTORE_PASSWORD')
+                      keyAlias System.getenv('KEY_ALIAS')
+                      keyPassword System.getenv('KEY_PASSWORD')
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                  }
+              }
+          }
+          EOF
+
+      - name: Build signed APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd app/android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk ../../${{ inputs.build_id }}.apk
+
+      - name: Publish APK as release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ inputs.build_id }}
+          name: "APK · ${{ inputs.app_name }}"
+          files: ${{ inputs.build_id }}.apk
